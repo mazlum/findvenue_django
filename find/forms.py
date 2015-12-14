@@ -3,6 +3,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.forms.fields import CharField
+from django.forms.models import ModelForm
+from find.models import UserKey
 
 ERROR_MESSAGES = {
     'required': "Bu alan zorunludur.",
@@ -38,3 +40,9 @@ class LoginForm(AuthenticationForm):
             'invalid_login': "Geçersiz kullanıcı adı, şifre.",
             'inactive': "Hesap inaktif.",
         }
+
+
+class KeyControlForm(ModelForm):
+    class Meta:
+        model = UserKey
+        fields = ['key']

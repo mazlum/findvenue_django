@@ -2,7 +2,7 @@
 from django.contrib.auth import authenticate
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from find.forms import RegistrationForm, LoginForm
+from find.forms import RegistrationForm, LoginForm, KeyControlForm
 import json
 from find.models import UserKey
 
@@ -52,5 +52,31 @@ def user_login(request):
                 return JsonResponse({"status": 0, "errors": form.errors})
         except:
             return JsonResponse({"status":0, "fail": "Giriş işlemi sırasında bir hata oluştu."})
+
+    return JsonResponse({"status": 0, "message": "Request rejected"})
+
+
+@csrf_exempt
+def control(request):
+    if request.method == "POST":
+        try:
+            request_data = json.loads(request.body)
+        except ValueError:
+            message = "Malformed JSON"
+            return JsonResponse({'status': 0, 'message': message})
+
+        try:
+            form = KeyControlForm(data=request_data)
+            if form.is_valid():
+                key = form.cleaned_data["key"]
+                key = UserKey.objects.filter(key=key)
+                if key:
+                    return JsonResponse({"status": 1,  "control": 1})
+
+                return JsonResponse({"status": 1,  "control": 0})
+            else:
+                return JsonResponse({"status": 0, "errors": form.errors})
+        except:
+            return JsonResponse({"status":0, "fail": "There was a problem"})
 
     return JsonResponse({"status": 0, "message": "Request rejected"})
